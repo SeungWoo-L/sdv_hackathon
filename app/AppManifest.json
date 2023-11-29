@@ -43,16 +43,8 @@
                     "sampleapp/getLane"
                 ],
                 "writes": [
-                    "sampleapp/getSpeed/response",
-                    "sampleapp/currentSpeed",
-                    "sampleapp/getSteer/response",
-                    "sampleapp/currentSteer",
-                    "sampleapp/getThrottle/response",
-                    "sampleapp/currentThrottle",
-                    "sampleapp/getBrake/response",
-                    "sampleapp/currentBrake",
-                    "sampleapp/getLane/response",
-                    "sampleapp/currentLane"
+                    "sampleapp/getScore/response",
+                    "sampleapp/currentScore"
                 ]
             }
         }

@@ -33,16 +33,9 @@ logging.basicConfig(format=get_opentelemetry_log_format())
 logging.getLogger().setLevel("DEBUG")
 logger = logging.getLogger(__name__)
 
-GET_SPEED_REQUEST_TOPIC = "sampleapp/getSpeed"
-GET_SPEED_RESPONSE_TOPIC = "sampleapp/getSpeed/response"
-GET_STEER_REQUEST_TOPIC = "sampleapp/getSteer"
-GET_STEER_RESPONSE_TOPIC = "sampleapp/getSteer/response"
-GET_THROT_REQUEST_TOPIC = "sampleapp/getThrottle"
-GET_THROT_RESPONSE_TOPIC = "sampleapp/getThrottle/response"
-GET_BRAKE_REQUEST_TOPIC = "sampleapp/getBrake"
-GET_BRAKE_RESPONSE_TOPIC = "sampleapp/getBrake/response"
-GET_LANE_REQUEST_TOPIC = "sampleapp/getLane"
-GET_LANE_RESPONSE_TOPIC = "sampleapp/getLane/response"
+GET_SCORE_REQUEST_TOPIC = "sampleapp/getScore"
+GET_SCORE_RESPONSE_TOPIC = "sampleapp/getScore/response"
+
 DATABROKER_SPEED_SUBSCRIPTION_TOPIC = "sampleapp/currentSpeed"
 DATABROKER_STEER_SUBSCRIPTION_TOPIC = "sampleapp/currentSteer"
 DATABROKER_TRHOT_SUBSCRIPTION_TOPIC = "sampleapp/currentThrottle"
@@ -130,92 +123,33 @@ class SampleApp(VehicleApp):
             json.dumps({"laneWarning": lane}),
         )
 
-    @subscribe_topic(GET_SPEED_REQUEST_TOPIC)
-    async def on_get_speed_request_received(self, data: str) -> None:
+    @subscribe_topic(GET_SCORE_REQUEST_TOPIC)
+    async def on_get_score_request_received(self, data: str) -> None:
         """The subscribe_topic annotation is used to subscribe for incoming
-        PubSub events, e.g. MQTT event for GET_SPEED_REQUEST_TOPIC.
+        PubSub events, e.g. MQTT event for GET_SCORE_REQUEST_TOPIC.
         """
 
         # Use the logger with the preferred log level (e.g. debug, info, error, etc)
         logger.debug(
             "PubSub event for the Topic: %s -> is received with the data: %s",
-            GET_SPEED_REQUEST_TOPIC,
+            GET_SCORE_REQUEST_TOPIC,
             data,
         )
 
         # Getting current speed from VehicleDataBroker using the DataPoint getter.
-        vehicle_speed = (await self.Vehicle.Speed.get()).value
+        driving_score = (await self.Vehicle.Speed.get()).value
 
         # Do anything with the speed value.
         # Example:
         # - Publishes the vehicle speed to MQTT topic (i.e. GET_SPEED_RESPONSE_TOPIC).
         await self.publish_event(
-            GET_SPEED_RESPONSE_TOPIC,
+            GET_SCORE_RESPONSE_TOPIC,
             json.dumps(
                 {
                     "result": {
                         "status": 0,
-                        "message": f"""Current Speed = {vehicle_speed}""",
+                        "message": f"""Current Score = {driving_score}""",
                     },
-                }
-            ),
-        )
-
-    @subscribe_topic(GET_STEER_REQUEST_TOPIC)
-    async def on_get_steer_request_received(self, data: str) -> None:
-        logger.debug("Received steer request: %s", data)
-        steer = (await self.Vehicle.Chassis.SteeringWheel.Angle.get()).value
-        await self.publish_event(
-            GET_STEER_RESPONSE_TOPIC,
-            json.dumps(
-                {
-                    "result": {
-                        "status": 0,
-                        "message": f"""Steer Angle = {steer}""",
-                    },
-                }
-            ),
-        )
-
-    @subscribe_topic(GET_THROT_REQUEST_TOPIC)
-    async def on_get_throttle_request_received(self, data: str) -> None:
-        logger.debug("Received throttle request: %s", data)
-        throttle = (await self.Vehicle.OBD.ThrottlePosition.get()).value
-        await self.publish_event(
-            GET_THROT_RESPONSE_TOPIC,
-            json.dumps(
-                {
-                    "result": {"status": 0, "message": f"""Throttle = {throttle}"""},
-                }
-            ),
-        )
-
-    @subscribe_topic(GET_BRAKE_REQUEST_TOPIC)
-    async def on_get_brake_request_received(self, data: str) -> None:
-        logger.debug("Received brake request: %s", data)
-        brake = (await self.Vehicle.Chassis.Brake.PedalPosition.get()).value
-        await self.publish_event(
-            GET_BRAKE_RESPONSE_TOPIC,
-            json.dumps(
-                {
-                    "result": {
-                        "status": 0,
-                        "message": f"""Brake\
-                Position = {brake}""",
-                    },
-                }
-            ),
-        )
-
-    @subscribe_topic(GET_LANE_REQUEST_TOPIC)
-    async def on_get_lane_request_received(self, data: str) -> None:
-        logger.debug("Received lane request: %s", data)
-        lane = (await self.Vehicle.ADAS.LaneDepartureDetection.IsWarning.get()).value
-        await self.publish_event(
-            GET_LANE_RESPONSE_TOPIC,
-            json.dumps(
-                {
-                    "result": {"status": 0, "message": f"""Lane Warning = {lane}"""},
                 }
             ),
         )
